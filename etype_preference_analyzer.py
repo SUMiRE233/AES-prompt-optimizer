@@ -25,7 +25,7 @@ class ContrastiveETypeAnalyzer:
     def __init__(self):
         self.api_url = os.getenv("AES_API_URL", "https://api.pateway.ai/v1/messages")
         self.api_key = os.getenv("AES_API_KEY")
-        self.model = os.getenv("AES_E_ANALYSIS_MODEL", "claude-opus-4-7")
+        self.model = os.getenv("AES_E_ANALYSIS_MODEL", "claude-sonnet-5")
         
         self.MAIN_DIMS = ['content', 'expression', 'structure']
         self.FROZEN_DIMS = []  # 冻结的维度，不参与迭代分析
@@ -42,6 +42,7 @@ class ContrastiveETypeAnalyzer:
         self.CONTRASTIVE_LOG = "etype_contrastive_log.json"
         self.FROZEN_LOG = "etype_frozen_dims.json"  # 记录冻结状态
         self.RANDOM_SEED = 42
+        self._legacy_position_to_index = None
         
         if not os.path.exists(self.OUTPUT_DIR):
             os.makedirs(self.OUTPUT_DIR)
@@ -93,11 +94,32 @@ class ContrastiveETypeAnalyzer:
         """加载全量评分数据"""
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        
-        for idx, item in enumerate(data):
-            item['data_index'] = idx
+        seen = set()
+        for position, item in enumerate(data):
+            if 'index' not in item:
+                raise ValueError(f"Scoring row {position} is missing global index")
+            index = int(item['index'])
+            if index in seen:
+                raise ValueError(f"Scoring data contains duplicate global index {index}")
+            seen.add(index)
         
         return data
+
+    def resolve_case_index(self, case):
+        """Resolve global identity, reading legacy positional badcases if needed."""
+        if 'index' in case:
+            return int(case['index'])
+        if 'data_index' not in case:
+            raise ValueError("E badcase is missing both index and legacy data_index")
+        if self._legacy_position_to_index is None:
+            rows = self.load_all_scoring_data(self.ALL_DATA_FILE)
+            self._legacy_position_to_index = {
+                position: int(item['index']) for position, item in enumerate(rows)
+            }
+        position = int(case['data_index'])
+        if position not in self._legacy_position_to_index:
+            raise IndexError(f"Legacy E badcase data_index out of range: {position}")
+        return self._legacy_position_to_index[position]
     
     def compute_statistics_for_normal_selection(self, all_data, dimension):
         """
@@ -172,7 +194,7 @@ class ContrastiveETypeAnalyzer:
             'residual': case.get('residual', 0),
             'z_score': z_score,
             'direction': case.get('direction', 'neutral'),
-            'data_index': case.get('data_index', -1)
+            'index': self.resolve_case_index(case)
         }
     
     def _get_essay_type(self, essay):
@@ -238,7 +260,7 @@ class ContrastiveETypeAnalyzer:
         
         self.compute_statistics_for_normal_selection(all_items, dimension)
         
-        outlier_indices = set(s.get('data_index', -1) for s in outlier_samples)
+        outlier_indices = set(s.get('index', -1) for s in outlier_samples)
         
         # 提取outlier的主要题目类型
         outlier_types = [self._get_essay_type(s['essay']) for s in outlier_samples]
@@ -254,8 +276,8 @@ class ContrastiveETypeAnalyzer:
         candidates = []
         
         for item in all_items:
-            data_idx = item.get('data_index', -1)
-            if data_idx in outlier_indices:
+            index = int(item['index'])
+            if index in outlier_indices:
                 continue
             
             z_score = item.get('z_scores', {}).get(dimension, 0)
@@ -420,14 +442,14 @@ Output ONLY valid JSON with these exact fields:
             "forbidden_generalization": ["What this rule should NOT be generalized into"],
             "positive_evidence_spans": [
                 {{
-                    "data_index": integer,
+                    "index": integer,
                     "span": "Exact text from essay (30-120 chars)",
                     "why_supports_rule": "How this span supports the rule"
                 }}
             ],
             "counter_evidence_spans": [
                 {{
-                    "data_index": integer,
+                    "index": integer,
                     "span": "Exact text from essay (30-120 chars)",
                     "why_limits_rule": "How this span limits rule extrapolation"
                 }}
@@ -447,8 +469,8 @@ Output ONLY valid JSON with these exact fields:
 }}
 
 ## STRICT FORMAT RULES
-- evidence.outlier_indices: list of data_index integers ONLY, no text
-- evidence.normal_indices: list of data_index integers ONLY, [] if none
+- evidence.outlier_indices: list of global index integers ONLY, no text
+- evidence.normal_indices: list of global index integers ONLY, [] if none
 - evidence_count: integer, must equal len(outlier_indices)
 - pattern fields: max 20 characters, no full sentences
 - If evidence_count < 2, set confidence <= 0.5 automatically
@@ -608,7 +630,7 @@ Output ONLY JSON."""
         
         print(f"\n[Step 1] Select OUTLIER samples for {dimension}...")
         outlier_samples = self.select_outlier_samples(badcase_data, dimension)
-        outlier_indices = [s.get('data_index', -1) for s in outlier_samples]
+        outlier_indices = [s.get('index', -1) for s in outlier_samples]
         print(f"  Selected {len(outlier_samples)} outlier samples")
         print(f"  Outlier indices: {outlier_indices}")
         
@@ -621,7 +643,7 @@ Output ONLY JSON."""
         
         print(f"\n[Step 2] Select MATCHED NORMAL samples for {dimension}...")
         normal_samples = self.select_normal_samples(badcase_data, dimension, outlier_samples)
-        normal_indices = [s.get('data_index', -1) for s in normal_samples]
+        normal_indices = [s.get('index', -1) for s in normal_samples]
         print(f"  Selected {len(normal_samples)} normal samples")
         print(f"  Normal indices: {normal_indices}")
         
@@ -924,6 +946,7 @@ Output ONLY JSON."""
                     rule['confidence_level'] = 'trusted'
                 else:
                     rule['confidence_level'] = 'candidate'
+                rule['evidence_index_type'] = 'global_index'
                 
                 feasible_rules.append(rule)
             

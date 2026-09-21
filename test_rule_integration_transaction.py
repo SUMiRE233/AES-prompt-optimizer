@@ -33,6 +33,7 @@ class RuleIntegrationTransactionTest(unittest.TestCase):
                             "counter_examples": "not applicable otherwise",
                             "confidence": 0.9,
                             "confidence_level": "trusted",
+                            "evidence_index_type": "global_index",
                             "evidence_count": 2,
                             "safe_for_global_bias": True,
                             "evidence": {
@@ -89,6 +90,10 @@ class RuleIntegrationTransactionTest(unittest.TestCase):
             1,
         )
         self.assertFalse(self.injected.exists())
+        self.assertEqual(
+            report["inserted_rules"][0]["evidence_index_type"],
+            "global_index",
+        )
 
         engine.commit()
 

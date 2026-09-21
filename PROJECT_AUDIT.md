@@ -2,9 +2,69 @@
 
 > 审计日期：2026-09-14  
 > 事实优先级：当前代码与可复算产物 > 当前测试结果 > 本地 Codex 开发会话 > 文件时间戳与旧总结。  
-> 归因边界：当前目录不是 Git repository，没有 `.git`、README、依赖清单、issue/PR 元数据。因此无法用 commit author 或 diff 证明代码作者；本文只把历史对话中由用户明确提出、质疑或决定的内容归为“我的贡献”，其余标记为 Codex 辅助或无法确认。
+> 历史归因边界：审计原始快照生成时目录没有 Git 历史，因此 Git 仍不能恢复 2026-09-18 以前的代码作者信息。后续提交只能证明修订过程，不能倒推早期作者。
 
 > 2026-09-19 范围决定：`technique` 与 `length` 从立项时即由上游确定性脚本评测，与评分 prompt 无关。本仓库只主张和优化 `content` / `expression` / `structure` 三个主观维度；本文中 C/D 相关内容仅作历史实现审计，不再构成当前项目主张、完成缺口或简历依据。
+
+## 2026-09-19 current-state addendum
+
+This addendum supersedes stale current-state statements in the historical
+sections below while preserving them as audit context.
+
+- The project is now named `AES-prompt-optimizer` and has a `main` Git history,
+  README, dependency file, environment example, and offline CI. The root commit
+  is `01fe653`; it does not establish authorship of earlier code.
+- The all-Sonnet B rerun reached V6. The declared cap compared V4/V5/V6 and
+  selected V4 with validation B Scores 3/11/7 respectively.
+- Real E gate runs now exist. Structure was rejected at the micro gate; content
+  passed micro and was rejected by the regular target/control gate. Both
+  transactions rolled back and neither candidate was promoted.
+- Layer-3 full-train and Layer-4 validation evaluators are implemented and
+  directly unit-tested, but no real E candidate reached them.
+- New E analysis and gate manifests use global `index`; legacy positional
+  artifacts are converted only at compatibility boundaries.
+- The offline suite contains 46 tests, a six-row explicitly synthetic smoke
+  fixture, normalized exact-duplicate detection, and a secret-free run
+  manifest generator. Remote model evaluation is excluded from Phase 1.
+- The remaining P0 evidence gap is Phase 2: obtain a genuinely untouched
+  teacher-labelled test set, freeze the protocol, repeat scoring, report
+  stability, then revoke the temporary key and make the human acceptance
+  decision.
+
+## 2026-09-21 current-state addendum (B-route freeze)
+
+This addendum supersedes the 2026-09-19 addendum where they disagree; the older
+text is kept as audit context.
+
+- The B route was re-verified and frozen under the unified objective
+  `Q = 2.5*mean(Severe) + mean(Soft)` with a two-tier precision protocol
+  (low-precision single-run exploration; first warning -> permanent double-eval
+  upgrade with a boundary re-check; V6 cap -> forced top-up of the last two
+  versions; two fixed validation runs per candidate; final order
+  Q -> fewer mean Severe -> earlier version). Status:
+  `B_EXPLORATORY_PROTOCOL_FROZEN` (`PROJECT_CLASS = EXPERIMENTAL`,
+  `INDEPENDENT_TEST = NONE`, `E_STATUS = DEFERRED`).
+- The official route was rebuilt offline from the existing artifacts (no new API
+  calls): first warning at V3 (refuted by the double-eval boundary check,
+  delta-Q = -0.25), V4/V5 passed at high precision, and the run stopped at a
+  high-precision gate at the V6 cap (`high_precision_gate_at_cap`). The live
+  session that produced the top-up measurements is recorded in
+  `b_rerun_log.json` (`cap_forced`), kept for traceability.
+- Validation (12 holdout essays, two fixed runs per candidate) selected **V6**
+  over V5 (Q 4.75 vs 5.25 - a noise-level margin; train means point the other
+  way). V6 is the frozen B candidate; V5 is retained as the nearest alternative.
+  There is **no independent test set**; the Phase-2 untouched-test goal is
+  deferred to the end of the full pipeline.
+- Evidence added: `B_REFACTOR_REPORT.md` section 12.7 (freeze record),
+  `b_rebuilt_route.json`, `b_validation_report.json`, `final_evidence.json`,
+  `final_train_scoring_results_mean.json(.provenance.json)` (per-essay mean
+  baseline for the E route), plus a `policy_migrations` record in the manifest.
+- The offline suite now contains 177 tests; `project_checks.py` passes 5/5;
+  temporary breakpoint-resume tooling was archived and root-level `tmp_*` files
+  were removed.
+- The 2026-09-19 note "the declared cap compared V4/V5/V6 and selected V4" is
+  historical: under the unified objective the frozen final is V6, selected by
+  the validation rule above, not by the old `5*Severe+Soft` Score.
 
 ## 1. Project Summary
 

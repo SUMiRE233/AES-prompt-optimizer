@@ -98,12 +98,18 @@ review checks whether the injected rule is semantically narrow, non-duplicative,
 and faithful to the scoring rubric. Only then may `--promote-final` replace the
 stable prompt.
 
-## Required implementation before the first E API run
+## Implementation status after the first E runs
 
-- Add the Layer-3 aggregate B/E evaluator.
-- Add the Layer-4 validation B guard.
-- Make `gate-and-train` evaluate the regular gate before spending a full-train
-  scoring run.
-- Add direction-stratified content sampling before the content iteration.
-- Keep the structure-first run at `--max-rules-per-sub-iteration 1` and do not
-  pass `--promote-final` during initial validation.
+- Layer-3 aggregate B/E evaluation is implemented and directly unit-tested.
+- Layer-4 validation B/target guarding is implemented and directly unit-tested.
+- `gate-and-train` evaluates the regular gate before spending a full-train run.
+- Content regular-gate sampling now guarantees strict/lenient direction
+  coverage when both directions exist and at least two sample slots are
+  available. The exploratory content run already happened to cover both
+  directions, but future coverage no longer depends on ordering.
+- New E artifacts use global `index`; historical positional evidence remains
+  readable through explicit compatibility conversion.
+- The structure candidate failed Layer 1 and the content candidate failed
+  Layer 2, so neither real run reached Layers 3–5. This is expected early-stop
+  behavior, not evidence that the later layers passed.
+- No run used `--promote-final`; B-final V4 remains frozen.

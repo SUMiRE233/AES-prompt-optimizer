@@ -1,0 +1,50 @@
+[
+  {
+    "index": 1001,
+    "name": "synthetic-a",
+    "page": "synthetic-1",
+    "essay": "Synthetic essay A for offline contract testing only.",
+    "teacher": {"content": 6, "expression": 6, "structure": 6},
+    "AI": {"content": 5, "expression": 5, "structure": 5}
+  },
+  {
+    "index": 1002,
+    "name": "synthetic-b",
+    "page": "synthetic-2",
+    "essay": "Synthetic essay B for offline contract testing only.",
+    "teacher": {"content": 5, "expression": 5, "structure": 5},
+    "AI": {"content": 5, "expression": 5, "structure": 5}
+  },
+  {
+    "index": 1003,
+    "name": "synthetic-c",
+    "page": "synthetic-3",
+    "essay": "Synthetic essay C for offline contract testing only.",
+    "teacher": {"content": 7, "expression": 6, "structure": 6},
+    "AI": {"content": 7, "expression": 6, "structure": 6}
+  },
+  {
+    "index": 1004,
+    "name": "synthetic-d",
+    "page": "synthetic-4",
+    "essay": "Synthetic essay D for offline contract testing only.",
+    "teacher": {"content": 4, "expression": 5, "structure": 4},
+    "AI": {"content": 5, "expression": 5, "structure": 5}
+  },
+  {
+    "index": 1005,
+    "name": "synthetic-e",
+    "page": "synthetic-5",
+    "essay": "Synthetic essay E for offline contract testing only.",
+    "teacher": {"content": 8, "expression": 7, "structure": 7},
+    "AI": {"content": 6, "expression": 7, "structure": 7}
+  },
+  {
+    "index": 1006,
+    "name": "synthetic-f",
+    "page": "synthetic-6",
+    "essay": "Synthetic essay F for offline contract testing only.",
+    "teacher": {"content": 3, "expression": 4, "structure": 4},
+    "AI": {"content": 3, "expression": 4, "structure": 4}
+  }
+]

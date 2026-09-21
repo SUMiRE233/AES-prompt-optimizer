@@ -2,7 +2,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from project_checks import CheckFailure, check_source_hygiene, index_rows, validate_scoring_artifact, validate_subset
+from project_checks import (
+    CheckFailure,
+    check_source_hygiene,
+    index_rows,
+    validate_no_duplicate_essays,
+    validate_scoring_artifact,
+    validate_subset,
+)
 
 
 class ProjectChecksTest(unittest.TestCase):
@@ -42,6 +49,14 @@ class ProjectChecksTest(unittest.TestCase):
             path.write_text(f'key = "{credential}"', encoding="utf-8")
             with self.assertRaises(CheckFailure):
                 check_source_hygiene(Path(temp_dir))
+
+    def test_whitespace_normalized_duplicate_essay_is_rejected(self):
+        rows = [
+            {"index": 1, "essay": "same text"},
+            {"index": 2, "essay": "same\n text"},
+        ]
+        with self.assertRaises(CheckFailure):
+            validate_no_duplicate_essays(rows, "origin")
 
 
 if __name__ == "__main__":

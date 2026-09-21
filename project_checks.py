@@ -48,6 +48,26 @@ def validate_subset(
     return set(subset_lookup)
 
 
+def normalized_essay_text(value: Any) -> str:
+    return re.sub(r"\s+", "", str(value or ""))
+
+
+def validate_no_duplicate_essays(rows: list[dict[str, Any]], label: str) -> None:
+    seen: dict[str, int] = {}
+    duplicates = []
+    for position, row in enumerate(rows):
+        text = normalized_essay_text(row.get("essay"))
+        if not text:
+            raise CheckFailure(f"{label}[{position}] has empty essay text")
+        index = int(row["index"])
+        if text in seen:
+            duplicates.append((seen[text], index))
+        else:
+            seen[text] = index
+    if duplicates:
+        raise CheckFailure(f"{label} contains normalized duplicate essays: {duplicates}")
+
+
 def validate_scoring_artifact(
     rows: list[dict[str, Any]],
     origin: dict[int, dict[str, Any]],
@@ -91,8 +111,11 @@ def check_local_data(root: Path = ROOT) -> list[str]:
     if not origin_path.exists():
         return ["private origin data absent; local artifact checks skipped"]
 
-    origin = index_rows(load_json(origin_path), "origin")
+    origin_rows = load_json(origin_path)
+    origin = index_rows(origin_rows, "origin")
+    validate_no_duplicate_essays(origin_rows, "origin")
     notes = [f"origin: {len(origin)} unique rows"]
+    notes.append("origin: no normalized exact essay duplicates")
 
     train_path = root / "train_essays.json"
     validation_path = root / "test_essays.json"
@@ -114,6 +137,63 @@ def check_local_data(root: Path = ROOT) -> list[str]:
             validate_scoring_artifact(load_json(path), origin, path.name)
             checked += 1
     notes.append(f"scoring artifacts aligned: {checked}")
+
+    manifest_path = root / "cv_folds.json"
+    if manifest_path.exists():
+        notes.extend(check_cv_protocol(root, origin, manifest_path))
+    return notes
+
+
+def check_cv_protocol(root: Path, origin: dict, manifest_path: Path) -> list[str]:
+    """校验 CV 划分协议：报告留出 + 工作池 + 各折的完整性与互斥性。"""
+    manifest = load_json(manifest_path)
+    notes = []
+
+    report_path = root / "report_holdout_essays.json"
+    work_path = root / "work_pool_essays.json"
+    if not report_path.exists() or not work_path.exists():
+        return notes
+
+    report = validate_subset(load_json(report_path), origin, "report_holdout")
+    work = validate_subset(load_json(work_path), origin, "work_pool")
+    if report & work:
+        raise CheckFailure(f"报告留出与工作池重叠: {sorted(report & work)}")
+    if report | work != set(origin):
+        missing = sorted(set(origin) - (report | work))
+        raise CheckFailure(f"报告留出与工作池未覆盖 origin; missing={missing}")
+
+    declared_report = {int(value) for value in manifest.get("report_holdout_indices", [])}
+    if declared_report != report:
+        raise CheckFailure("cv_folds.json 的 report_holdout_indices 与文件不一致")
+    declared_work = {int(value) for value in manifest.get("work_pool_indices", [])}
+    if declared_work != work:
+        raise CheckFailure("cv_folds.json 的 work_pool_indices 与文件不一致")
+
+    covered_eval: set[int] = set()
+    for fold in manifest.get("folds", []):
+        number = int(fold["fold"])
+        train_path = root / "fold_essays" / f"fold{number}_train_essays.json"
+        eval_path = root / "fold_essays" / f"fold{number}_eval_essays.json"
+        if not train_path.exists() or not eval_path.exists():
+            raise CheckFailure(f"fold{number} 的训练/评估作文文件缺失")
+        train = validate_subset(load_json(train_path), origin, f"fold{number}_train")
+        evaluation = validate_subset(load_json(eval_path), origin, f"fold{number}_eval")
+        if train & evaluation:
+            raise CheckFailure(f"fold{number} 训练与评估重叠: {sorted(train & evaluation)}")
+        if train | evaluation != work:
+            raise CheckFailure(f"fold{number} 训练+评估未覆盖工作池")
+        if evaluation & covered_eval:
+            raise CheckFailure(f"fold{number} 的评估集与其它折重叠")
+        covered_eval |= evaluation
+
+    if covered_eval != work:
+        missing = sorted(work - covered_eval)
+        raise CheckFailure(f"各折评估集未覆盖工作池; missing={missing}")
+
+    notes.append(
+        f"cv protocol: report={len(report)}, work={len(work)}, "
+        f"folds={len(manifest.get('folds', []))}"
+    )
     return notes
 
 
@@ -135,4 +215,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

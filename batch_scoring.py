@@ -1,8 +1,15 @@
 import json
 import os
+import re
 import time
 
 from api_response import extract_response_text
+
+
+# Only a clean integer token is accepted for a score field. Anything else
+# ("6.5", "6分", "--") must fail loudly: score_min is 0, so the old silent
+# fallback of 0 passed _validate_score and recorded a fabricated zero score.
+_INTEGER_TOKEN_RE = re.compile(r"[+-]?\d+")
 
 
 class BatchEssayScorer:
@@ -189,10 +196,10 @@ class BatchEssayScorer:
     def _parse_single_essay(self, essay_block):
         """Parse a single essay block between ===ESSAY_START=== and ===ESSAY_END==="""
         result = {
-            "id": 0,
-            "content": 0,
-            "expression": 0,
-            "structure": 0,
+            "id": None,
+            "content": None,
+            "expression": None,
+            "structure": None,
             "comment": ""
         }
 
@@ -233,11 +240,23 @@ class BatchEssayScorer:
         return result
 
     def _safe_parse_int(self, value):
-        """Safely parse integer with fallback."""
-        try:
-            return int(value)
-        except (ValueError, TypeError):
-            return 0
+        """Parse an integer field, rejecting anything that is not a clean integer.
+
+        Returning 0 on failure is worse than failing: ``score_min`` is 0, so the
+        fabricated value passes ``_validate_score`` and a malformed or half-precision
+        score such as ``6.5`` would be recorded as a legitimate zero. ``None`` forces
+        the caller onto the explicit failure path instead.
+        """
+        if isinstance(value, bool):
+            return None
+        if isinstance(value, int):
+            return value
+        if value is None:
+            return None
+        text = str(value).strip()
+        if not _INTEGER_TOKEN_RE.fullmatch(text):
+            return None
+        return int(text)
 
     def _validate_score(self, score):
         """Validate score is within configured range."""
@@ -290,7 +309,11 @@ class BatchEssayScorer:
             if not self._validate_score(essay_result['structure']):
                 print(f"  Warning: Invalid structure score {essay_result['structure']} for essay {essay_result['id']}")
                 return None
-            
+
+            if essay_result['id'] is None:
+                print("  Warning: Missing or malformed essay ID")
+                return None
+
             if essay_result['id'] > 0 or essay_result['content'] > 0:
                 results.append(essay_result)
 

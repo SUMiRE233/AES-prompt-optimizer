@@ -102,15 +102,52 @@ class MicroScoringGate:
         return result
 
     @staticmethod
-    def b_bias_entries(badcases: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def resolve_evidence_indices(
+        rule: Dict[str, Any],
+        field: str,
+        baseline_rows: List[Dict[str, Any]],
+        baseline_by_index: Dict[int, Dict[str, Any]],
+    ) -> List[int]:
+        values = MicroScoringGate.normalize_data_indices(
+            rule.get("evidence", {}).get(field)
+        )
+        index_type = rule.get("evidence_index_type") or rule.get("evidence", {}).get(
+            "index_type"
+        )
+        if index_type == "global_index":
+            missing = [index for index in values if index not in baseline_by_index]
+            if missing:
+                raise KeyError(f"Rule evidence indices are absent from baseline: {missing}")
+            return values
+
+        # Historical consolidated files used array positions. New artifacts are
+        # explicitly marked global_index, so the fallback is deterministic.
+        resolved = []
+        for position in values:
+            if position < 0 or position >= len(baseline_rows):
+                raise IndexError(f"Legacy evidence data_index out of range: {position}")
+            resolved.append(int(baseline_rows[position]["index"]))
+        return MicroScoringGate.normalize_data_indices(resolved)
+
+    @staticmethod
+    def b_bias_entries(
+        badcases: Dict[str, Any], baseline_rows: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         entries = []
         for severity in ("severe", "soft"):
             for item in badcases.get("B_bias", {}).get(severity, []):
-                if "data_index" not in item:
-                    continue
+                if "index" in item:
+                    index = int(item["index"])
+                elif "data_index" in item:
+                    position = int(item["data_index"])
+                    if position < 0 or position >= len(baseline_rows):
+                        raise IndexError(f"Legacy B-bias data_index out of range: {position}")
+                    index = int(baseline_rows[position]["index"])
+                else:
+                    raise ValueError("B-bias entry is missing index and legacy data_index")
                 entries.append(
                     {
-                        "data_index": int(item["data_index"]),
+                        "index": index,
                         "severity": item.get("severity", severity),
                     }
                 )
@@ -118,6 +155,7 @@ class MicroScoringGate:
 
     def build_manifest(self) -> Dict[str, Any]:
         baseline = self.load_json(self.baseline_path)
+        baseline_by_index = self.score_lookup(baseline)
         badcases = self.load_json(self.badcase_path)
         if self.injected_rules is not None:
             rules = self.injected_rules
@@ -137,51 +175,51 @@ class MicroScoringGate:
         outlier_indices = []
         normal_indices = []
         for rule in rules:
-            evidence = rule.get("evidence", {})
             outlier_indices.extend(
-                self.normalize_data_indices(evidence.get("outlier_indices"))
+                self.resolve_evidence_indices(
+                    rule, "outlier_indices", baseline, baseline_by_index
+                )
             )
             normal_indices.extend(
-                self.normalize_data_indices(evidence.get("normal_indices"))
+                self.resolve_evidence_indices(
+                    rule, "normal_indices", baseline, baseline_by_index
+                )
             )
         outlier_indices = self.normalize_data_indices(outlier_indices)
         normal_indices = self.normalize_data_indices(normal_indices)
-        b_entries = self.b_bias_entries(badcases)
+        b_entries = self.b_bias_entries(badcases, baseline)
 
         sample_roles: Dict[int, Dict[str, Any]] = {}
 
-        def ensure_role(data_index: int) -> Dict[str, Any]:
-            if data_index < 0 or data_index >= len(baseline):
-                raise IndexError(f"Micro scoring data_index out of range: {data_index}")
+        def ensure_role(index: int) -> Dict[str, Any]:
+            if index not in baseline_by_index:
+                raise KeyError(f"Micro scoring global index is absent from baseline: {index}")
             return sample_roles.setdefault(
-                data_index,
+                index,
                 {
-                    "data_index": data_index,
+                    "index": index,
                     "evidence_roles": [],
                     "b_bias_severities": [],
                 },
             )
 
-        for data_index in outlier_indices:
-            ensure_role(data_index)["evidence_roles"].append("outlier")
-        for data_index in normal_indices:
-            ensure_role(data_index)["evidence_roles"].append("normal")
+        for index in outlier_indices:
+            ensure_role(index)["evidence_roles"].append("outlier")
+        for index in normal_indices:
+            ensure_role(index)["evidence_roles"].append("normal")
         for entry in b_entries:
-            ensure_role(entry["data_index"])["b_bias_severities"].append(entry["severity"])
+            ensure_role(entry["index"])["b_bias_severities"].append(entry["severity"])
 
         if not sample_roles:
             raise ValueError("Latest injected rule has no usable evidence or B-bias samples.")
 
         samples = []
         essays = []
-        for data_index in sorted(sample_roles):
-            baseline_item = baseline[data_index]
-            if "index" not in baseline_item:
-                raise ValueError(f"Baseline row {data_index} is missing index.")
-            role = sample_roles[data_index]
+        for index in sorted(sample_roles):
+            baseline_item = baseline_by_index[index]
+            role = sample_roles[index]
             sample = {
                 **role,
-                "index": int(baseline_item["index"]),
                 "dimension": dimension,
                 "name": baseline_item.get("name"),
                 "page": baseline_item.get("page"),
@@ -196,6 +234,7 @@ class MicroScoringGate:
 
         manifest = {
             "created_at": datetime.now().isoformat(timespec="seconds"),
+            "identity": "global_index",
             "dimension": dimension,
             "baseline_file": self.baseline_path,
             "badcase_file": self.badcase_path,

@@ -163,6 +163,31 @@ class MicroScoringGateTest(unittest.TestCase):
         self.assertEqual(manifest["counts"]["normals"], 1)
         self.assertEqual(len(manifest["rules"]), 2)
 
+    def test_global_evidence_indices_do_not_depend_on_array_position(self):
+        rules = [
+            {
+                "dimension": "content",
+                "evidence_index_type": "global_index",
+                "evidence": {"outlier_indices": [12], "normal_indices": [10]},
+            }
+        ]
+        gate = MicroScoringGate(
+            baseline_path=str(self.paths["baseline.json"]),
+            badcase_path=str(self.paths["badcases.json"]),
+            injected_rule_path=str(self.paths["injected.json"]),
+            essays_output_path=str(self.paths["essays.json"]),
+            manifest_output_path=str(self.paths["manifest.json"]),
+            candidate_path=str(self.paths["candidate.json"]),
+            eval_output_path=str(self.paths["eval.json"]),
+            injected_rules=rules,
+        )
+
+        manifest = gate.build_manifest()
+
+        self.assertEqual(manifest["identity"], "global_index")
+        outlier = next(item for item in manifest["samples"] if item["index"] == 12)
+        self.assertEqual(outlier["evidence_roles"], ["outlier"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -295,6 +295,7 @@ class RuleIntegrationEngine:
                     "evidence_count": rule.get("evidence_count"),
                     "confidence_level": rule.get("confidence_level"),
                     "evidence": rule.get("evidence", {}),
+                    "evidence_index_type": rule.get("evidence_index_type"),
                     # 新增字段
                     "should_be_injected_at": rule.get("should_be_injected_at", "local_residual_calibration"),
                     "resolved_injection_anchor": injection_info.get("resolved", "local_residual_calibration"),

@@ -6,6 +6,7 @@ htmlcov/
 .venv/
 venv/
 artifacts/
+.vscode/
 
 .env
 .env.*
@@ -20,6 +21,7 @@ test_essays.json
 train_meta.json
 test_meta.json
 *_scoring_results*.json
+!fixtures/synthetic_scoring_results.json
 aes_badcases*.json
 api_request_debug.json
 raw_response_dump.txt
@@ -31,6 +33,24 @@ etype_frozen_dims.json
 etype_analysis/*.json
 optimized_result.json
 test_injected_prompt*.md
+prompt_candidate_decisions.json
+b_version_review.json
+b_rerun_log.json
+b_protocol_state.json
+b_validation_report.json
+b_rebuilt_route.json
+b_gate_report.json
+
+# Archived experiment runs (contain essay text and run artifacts).
+archive/
+discarded/
+
+# CV protocol artifacts (shelved; kept as defensive rules in case k-fold returns).
+report_holdout_essays.json
+work_pool_essays.json
+fold_essays/
+cv_folds.json
+cv_runs/
 
 # Runtime candidates and reports.
 gate_test_*.json
@@ -38,3 +58,13 @@ micro_scoring_*.json
 injected_prompt_next*.md
 final_aes_badcases.json
 final_train_scoring_results.json
+final_evidence.json
+final_train_scoring_results_mean*.json
+run_manifest*.json
+
+# TEMPORARY breakpoint-resume driver artifacts (contain essay text + scores).
+# Deleted together with tmp_resume_run.py before the official version.
+# NOTE: tmp_resume_run.py / tmp_resume_smoke.py are intentionally NOT ignored so
+#       they stay visible as untracked files and cannot be forgotten.
+tmp_ckpt_*.json
+tmp_run_log.txt
