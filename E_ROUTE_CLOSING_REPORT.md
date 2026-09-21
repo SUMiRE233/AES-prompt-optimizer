@@ -8,6 +8,7 @@
   - v0.2 按 2026-09-21 首次评审修订——① 冻结名单运行时哈希校验；② 阶段复用身份 sidecar 校验；③ 表述收紧；④ 模型记录拆分；⑤ stop_status 更名；⑥ 产物策略
   - v0.3 按复核意见修订——⑦ `route_conclusion.noise_reference` 口径统一；⑧ `status` 增加 `manifest_integrity: valid|invalid` 输出（“每次入口”表述相应改为“依赖名单的执行入口”）；⑨ 新增推送前中文翻译清单
   - 定稿（推送版）——⑩ 说明性文本中文化执行完毕；文件更名为 `E_ROUTE_CLOSING_REPORT.md`
+  - 定稿补正——⑪ README 全文中文化（按项目负责人补正要求，推送后补交）
 
 ---
 
@@ -194,7 +195,7 @@
 - `e_candidate_manifest.draft.json`、`e_candidate_evidence.local.json`
 - `etype_analysis/` 整目录（现为目录级忽略；含归档报告、评分档、请求/响应、预算状态、sidecar、cand 副本）
 
-**推送前清单（已执行 @2026-09-21）**：说明性文本已完成中文化——`e_protocol_manifest.json` 的 `route_conclusion.noise_reference`、`candidate_outcomes`（响应序 2 的结局短语）、`budgets.derivation`、`observed_execution_models.sources`、`budget_amendments.derivation`，以及 `e_candidate_rule.public.json` 的 `note`。README 为既有英文文档，本轮仅更新数值（251），无新增说明句，未作翻译。
+**推送前清单（已执行 @2026-09-21）**：说明性文本已完成中文化——`e_protocol_manifest.json` 的 `route_conclusion.noise_reference`、`candidate_outcomes`（响应序 2 的结局短语）、`budgets.derivation`、`observed_execution_models.sources`、`budget_amendments.derivation`，以及 `e_candidate_rule.public.json` 的 `note`。README 于初始推送时仅数值更新；经项目负责人补正指出后，已随定稿补正提交**全文中文化**（见 ⑪）。
 
 **已清理**：`etype_analysis/_*.py` 临时调查脚本已删除（脱敏生成器 `export-public-rule` 已成为 `e_phase2_run.py` 的正式子命令）。
 
