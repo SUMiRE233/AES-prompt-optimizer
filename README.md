@@ -10,13 +10,13 @@
 - **设计上排除：** `technique` 与 `length` 由上游确定性脚本评测，不是提示词输出、优化目标，也不属于本仓库的项目主张。
 - **不作声称：** 生产部署、大规模泛化、统计显著改善、或自主提示词晋升。
 
-完整证据与贡献审计见 [PROJECT_AUDIT.md](PROJECT_AUDIT.md)。
+完整证据与贡献审计留档于本地 `PROJECT_AUDIT.md`；按项目策略，除本 README 与评分 prompt 外，说明性文档不随仓库分发。
 
 ## B 路线最近一次重跑（2026-09-19）
 
 ### B 当前状态（2026-09-21，探索性冻结）
 
-B 路线在统一目标 `Q = 2.5*mean(Severe)+mean(Soft)` 与两级精度协议下重新冻结。官方路线基于既有工件离线重建（无新增 API 调用）：V3 首次告警、被双评边界检查推翻；V4/V5 以高精度通过；运行停在 **V6 上限处的高精度门**（`high_precision_gate_at_cap`）。验证（12 篇留出作文、每候选两次固定重跑）在 V5 与 **V6** 之间选择了 V6（Q 4.75 对 5.25 —— 噪声级差距；训练均值指向相反方向）。状态：`B_EXPLORATORY_PROTOCOL_FROZEN`。证据：`B_REFACTOR_REPORT.md` §12.7、`final_evidence.json`、`b_rebuilt_route.json`。**不存在独立测试集**；不声称 V5 与 V6 可区分。
+B 路线在统一目标 `Q = 2.5*mean(Severe)+mean(Soft)` 与两级精度协议下重新冻结。官方路线基于既有工件离线重建（无新增 API 调用）：V3 首次告警、被双评边界检查推翻；V4/V5 以高精度通过；运行停在 **V6 上限处的高精度门**（`high_precision_gate_at_cap`）。验证（12 篇留出作文、每候选两次固定重跑）在 V5 与 **V6** 之间选择了 V6（Q 4.75 对 5.25 —— 噪声级差距；训练均值指向相反方向）。状态：`B_EXPLORATORY_PROTOCOL_FROZEN`。证据（均为本地留档）：`B_REFACTOR_REPORT.md` §12.7、`final_evidence.json`、`b_rebuilt_route.json`。**不存在独立测试集**；不声称 V5 与 V6 可区分。
 
 评分与提示词优化均使用 `claude-sonnet-5`；探索性首轮运行已扩展到最后一个完整版本 V5：
 
@@ -36,7 +36,7 @@ B 路线在统一目标 `Q = 2.5*mean(Severe)+mean(Soft)` 与两级精度协议�
 | 验证 V5 | 12 | -0.278 | 0.833 | 2 / 1 |
 | 验证 V6 | 12 | -0.139 | 0.806 | 1 / 2 |
 
-在 `Score = 5 * Severe + Soft` 口径下，V6 安全上限比较得到 V4=3、V5=11、V6=7。V4 曾获选并晋升为当时的 B 终版（已被上述 2026-09-21 重新冻结取代）。V5 作为后期迭代的回归示例保留：其 MAE 改善的同时严重 B 案例回归。12 篇验证样本参与了版本比较，因此这些数字不构成独立测试证据。首轮报告与局限见 [SONNET_FIRST_RUN_REPORT.md](SONNET_FIRST_RUN_REPORT.md)。
+在 `Score = 5 * Severe + Soft` 口径下，V6 安全上限比较得到 V4=3、V5=11、V6=7。V4 曾获选并晋升为当时的 B 终版（已被上述 2026-09-21 重新冻结取代）。V5 作为后期迭代的回归示例保留：其 MAE 改善的同时严重 B 案例回归。12 篇验证样本参与了版本比较，因此这些数字不构成独立测试证据。首轮报告与局限见本地留档 `SONNET_FIRST_RUN_REPORT.md`。
 
 ## 架构
 

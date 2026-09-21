@@ -70,6 +70,18 @@ e_candidate_evidence.local.json
 e_candidate_rule.json
 e_candidate_prompt.md
 e_candidate_prompt_meta.md
+
+# 说明性文档仅本地留档（入库仅保留 README 与评分 prompt）
+PROJECT_AUDIT.md
+SONNET_FIRST_RUN_REPORT.md
+B_REFACTOR_REPORT.md
+COMPLETION_PLAN.md
+ETYPE_ITERATION_V2_DESIGN.md
+CONTENT_E_VALIDATION_REPORT.md
+E_VALIDATION_PLAN.md
+STRUCTURE_E_VALIDATION_REPORT.md
+E_PREEXECUTION_REVIEW.md
+E_ROUTE_CLOSING_REPORT.md
 final_evidence.json
 final_train_scoring_results_mean*.json
 run_manifest*.json
