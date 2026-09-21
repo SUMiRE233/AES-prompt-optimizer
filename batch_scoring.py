@@ -67,7 +67,10 @@ class BatchEssayScorer:
             f.write(prompt)
             f.write("\n" + "=" * 80 + "\n")
             f.write(f"Prompt length: {len(prompt)} characters\n")
-            f.write(f"Prompt lines: {prompt.count('\\n') + 1}\n")
+            # Python < 3.12 rejects backslashes inside f-string expressions (PEP 701),
+            # so the line count is computed outside the f-string.
+            prompt_lines = prompt.count("\n") + 1
+            f.write(f"Prompt lines: {prompt_lines}\n")
 
     def build_batch_request(self, essays_batch, scoring_prompt):
         essays_content = ""
