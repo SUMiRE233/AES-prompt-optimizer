@@ -1,0 +1,226 @@
+{
+  "phase": "phase1_preexecution",
+  "status": "approved_2026-09-21",
+  "created_at": "2026-09-21T20:04:05",
+  "baseline": {
+    "final_b_version": "V6",
+    "active_prompt": "final_prompt.md",
+    "train_mean_evidence": "final_train_scoring_results_mean.json",
+    "protocol_version": "Q-mean-2.5-v1",
+    "q_weight": 2.5
+  },
+  "consensus_version": "E-consensus-robust-z-v1",
+  "formulas": {
+    "e_consensus": "per run: residual = delta - median(delta), z = residual / (1.4826*MAD + eps); E sample: z1*z2 > 0 and abs(mean(delta1, delta2)) >= 1.0; severity: abs(mean(z1, z2)) > 2.5 -> severe, > 1.5 -> soft",
+    "b_rule": "severe: abs(B) > 1.5 and direction_consistency >= 3; soft: abs(B) > 1.0 and direction_consistency >= 2",
+    "b_consensus": "rule 'mean_and_rerun_conservative' (operative adjudication, not a natural symmetric consensus): members = flagged by the frozen B rule on the two-run mean profile; severity = severe only when the mean profile and the rerun both flag severe; the rerun serves as the review run in this project's precision-upgrade timeline",
+    "decision_thresholds": "delta_abs_error = candidate_abs_error - baseline_abs_error; clear_improvement <= -1.0; clear_regression >= +1.0"
+  },
+  "b_layers": {
+    "b_route_metric": {
+      "mean_severe": 3.0,
+      "mean_soft": 6.5,
+      "q": 14.0,
+      "source": "arithmetic mean of per-run B counts (run1/run2)",
+      "used_for": "Gate 3 global B regression"
+    },
+    "b_consensus_samples": {
+      "severe": 2,
+      "soft": 6,
+      "total": 8,
+      "rule": "mean_and_rerun_conservative",
+      "used_for": "micro sample identity",
+      "description_kind": "operative_adjudication",
+      "variants_usage": "archived for audit only; must not drive sample roles or gates"
+    },
+    "b_run_counts": {
+      "run1": {
+        "severe": 3,
+        "soft": 5,
+        "total": 8
+      },
+      "run2": {
+        "severe": 3,
+        "soft": 8,
+        "total": 11
+      }
+    },
+    "b_consensus_variants": {
+      "mean_and_rerun_conservative": {
+        "severe": 2,
+        "soft": 6,
+        "total": 8
+      },
+      "mean_and_run1_conservative": {
+        "severe": 2,
+        "soft": 6,
+        "total": 8
+      },
+      "mean_membership_only": {
+        "severe": 4,
+        "soft": 4,
+        "total": 8
+      },
+      "both_runs_mean_rule": {
+        "severe": 2,
+        "soft": 4,
+        "total": 6
+      },
+      "both_runs_conservative": {
+        "severe": 0,
+        "soft": 6,
+        "total": 6
+      },
+      "both_runs_either_severe": {
+        "severe": 5,
+        "soft": 1,
+        "total": 6
+      }
+    }
+  },
+  "budgets": {
+    "max_successful_scoring_calls": 113,
+    "max_successful_analysis_calls": 2,
+    "max_successful_calls": 115,
+    "max_request_attempts": 220,
+    "derivation": "原始：训练 36×2=72，验证 12×2=24，分析 1 次 + 1 次重试；2026-09-21 修正（操作性裁定）：候选 1 已耗 17 → 17+96（候选 2 完整链路）=113 次评分成功，113+2 分析=115 总成功；attempts 110→220 以吸收实测 SSL 传输重试",
+    "reuse_key": "(prompt_sha256, model, global_index, repeat_id, scoring_protocol)",
+    "configured_models_at_protocol_freeze": {
+      "AES_SCORING_MODEL": "claude-sonnet-5",
+      "AES_OPTIMIZER_MODEL": "claude-sonnet-5",
+      "AES_E_ANALYSIS_MODEL": "claude-sonnet-5"
+    },
+    "observed_execution_models": {
+      "analysis": "claude-opus-5",
+      "scoring": "claude-sonnet-5",
+      "sources": {
+        "analysis": "etype_analysis/structure_contrastive_request.json 的 model 字段",
+        "scoring": "执行启动时的终端回显；无逐请求归档"
+      }
+    }
+  },
+  "status_enum": [
+    "E_DEFERRED",
+    "E_PREEXECUTION_AWAITING_SAMPLE_APPROVAL",
+    "E_BLOCKED_INFRASTRUCTURE",
+    "E_NO_VALID_CANDIDATE",
+    "E_EVALUATED_REJECTED",
+    "E_FIRST_PASS_PASSED_PENDING_BUDGET",
+    "E_CANDIDATE_PASSED_AWAITING_HUMAN",
+    "E_EXPLORATORY_PATCH_PROMOTED"
+  ],
+  "phase1_stop_status": "E_PREEXECUTION_AWAITING_SAMPLE_APPROVAL",
+  "final_route_status": "E_NO_VALID_CANDIDATE",
+  "legacy_labels": {
+    "stop_reason_authority": "b_protocol_state.json",
+    "b_validation_report_reason": "legacy label 'cap_reached' is retained for provenance; B history is not rewritten"
+  },
+  "candidate_rule_constraints": [
+    "one dimension / one candidate / one rule / at most one non-semantic retry",
+    "qualitative wording only: no fixed scores, percentages or score floors",
+    "must not duplicate rules already present in the frozen final prompt",
+    "must not alter other scoring dimensions",
+    "must be injected under the existing 结构分特殊情形 anchor",
+    "must not add new top-level sections",
+    "must pass the existing prompt structure contract"
+  ],
+  "approved_gate_policy": {
+    "target_weight": 1.0,
+    "non_target_weight": 0.3333333333333333,
+    "b_soft_penalty_weight": 0.3333333333333333,
+    "b_severe_penalty_weight": 0.6666666666666666,
+    "first_pass_catastrophic_delta": 2.0,
+    "micro_min_u": 0.01,
+    "full_train": {
+      "b_mean_severe_max": 3.0,
+      "b_q_max": 14.0,
+      "cross_dim_clear_regressions_allowed": 0,
+      "non_target_new_e_members": 0,
+      "non_target_soft_to_severe": 0
+    },
+    "validation": {
+      "b_mean_severe_max": 1.5,
+      "b_q_max": 4.75,
+      "clear_regressions_allowed": 0
+    },
+    "regular": {
+      "required_improve_rate": 0.5,
+      "ceil_rule": true,
+      "target_regressions_allowed": 0,
+      "control_regressions_allowed": 1,
+      "cross_dim_regressions_allowed": 1
+    },
+    "source": "e_gate_engine.py / decision_thresholds.py"
+  },
+  "rule_selection_policy": {
+    "policy": "lazy_sequential_first_pass",
+    "description_kind": "operative_adjudication",
+    "ruled_by": "项目负责人",
+    "ruled_at": "2026-09-21",
+    "description": "按响应数组原序取第 1 条，在其上执行 Gate 0 硬拒绝检查（注入位置/范围/硬阈值/证据池/重复/契约预算）；未通过则顺延至下一条；全部未通过则 E_NO_VALID_CANDIDATE；不做前筛选排序；已归档响应不得重发请求",
+    "admission": "hard_review_pass_auto_admits",
+    "admission_ruling": "2026-09-21 裁定：硬审查通过即进入测试流程，此节点不设人工通过点；人工否决权保留至执行开始前；全部门禁通过后仍停在 E_CANDIDATE_PASSED_AWAITING_HUMAN，无自动晋升",
+    "rationale": "惰性补全：最小机械干预，避免引入人工权重与选择偏差"
+  },
+  "budget_amendments": [
+    {
+      "ruled_at": "2026-09-21",
+      "ruled_by": "项目负责人",
+      "description_kind": "operative_adjudication",
+      "ruling": "候选 1（响应序 0）首评门被拒（对照 20 号 structure Δ+2.0）后：人工裁定顺延至第二条规则（响应序 1），并授权预算扩大到足够第二条完整链路",
+      "scoring_success_cap": {
+        "before": 96,
+        "after": 113
+      },
+      "total_success_cap": {
+        "before": 98,
+        "after": 115
+      },
+      "attempts_cap": {
+        "before": 110,
+        "after": 220
+      },
+      "derivation": "17（候选 1 已耗）+96（候选 2 链路）=113；attempts 110→220 以吸收实测 SSL 传输重试"
+    }
+  ],
+  "process_amendments": [
+    {
+      "ruled_at": "2026-09-21",
+      "ruled_by": "项目负责人",
+      "description_kind": "operative_adjudication",
+      "ruling": "候选 1/2 均被首评门拒后：授权候选 3（响应序 2）仅做首评快筛（micro_r1，17 次），通过后再议完整链路额度",
+      "added_status": "E_FIRST_PASS_PASSED_PENDING_BUDGET",
+      "note": "快筛通过时以该状态停机，等待预算裁定；阶段结果按 reuse key 复用，不重复扣费"
+    }
+  ],
+  "review_amendments": [
+    {
+      "reviewed_at": "2026-09-21",
+      "reviewer": "项目负责人 + 审阅模型",
+      "description_kind": "review_applied",
+      "changes": [
+        "require_frozen_manifest 运行时重算规范体 SHA-256 并与 approval.frozen_sha256 比对，失配即阻断（含篡改测试）",
+        "阶段结果复用增加身份 sidecar（prompt_sha256/model/global_indices/repeat_id/scoring_protocol）；sidecar 缺失或失配即阻断（含测试）",
+        "模型记录拆分为 configured_models_at_protocol_freeze 与 observed_execution_models（保留原配置，不改历史）",
+        "stop_status 更名为 phase1_stop_status，新增 final_route_status",
+        "README 单元测试计数更新",
+        "产物入库策略：e_candidate_rule.json 原文与候选提示词转为本地忽略；新增去引文的 e_candidate_rule.public.json；etype_analysis/ 整目录本地化"
+      ]
+    }
+  ],
+  "route_conclusion": {
+    "ruled_at": "2026-09-21",
+    "ruled_by": "项目负责人",
+    "description_kind": "operative_adjudication",
+    "ruling": "接受收束：E 路线以无候选通过告终；候选 0/1 首评门拒绝，候选 2 Gate 0 拒绝；不晋升",
+    "candidate_outcomes": [
+      { "response_index": 0, "mechanism": "回环框架", "outcome": "E_EVALUATED_REJECTED", "first_pass_violation": "idx20 structure +2.0", "scoring_calls": 17 },
+      { "response_index": 1, "mechanism": "断尾处理", "outcome": "E_EVALUATED_REJECTED", "first_pass_violation": "idx19 expression +2.0", "scoring_calls": 17 },
+      { "response_index": 2, "mechanism": "错别字解耦", "outcome": "Gate 0 拒绝（禁用词“一律”）", "scoring_calls": 0 }
+    ],
+    "noise_reference": "基线 rerun 对 run1 在 17×3 上的最大正向 Δ 观测为 +1.0；两次 +2.0 命中超出该经验参考并被冻结首评门拒绝；这不构成对跑动方差的统计排除",
+    "final_budget": { "scoring_success": 34, "analysis_success": 1, "attempts": 49 },
+    "final_prompt_untouched": true,
+    "no_promotion": true
+  }
+}

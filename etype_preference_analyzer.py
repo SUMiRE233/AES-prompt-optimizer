@@ -629,7 +629,12 @@ Output ONLY JSON."""
         print(f"{'='*60}")
         
         print(f"\n[Step 1] Select OUTLIER samples for {dimension}...")
-        outlier_samples = self.select_outlier_samples(badcase_data, dimension)
+        explicit_pool = (getattr(self, "EXPLICIT_SAMPLES", None) or {}).get(dimension)
+        if explicit_pool is not None:
+            outlier_samples = list(explicit_pool.get("outliers", []))
+            print(f"  [EXPLICIT] frozen E sample pool: {len(outlier_samples)} outliers")
+        else:
+            outlier_samples = self.select_outlier_samples(badcase_data, dimension)
         outlier_indices = [s.get('index', -1) for s in outlier_samples]
         print(f"  Selected {len(outlier_samples)} outlier samples")
         print(f"  Outlier indices: {outlier_indices}")
@@ -642,7 +647,11 @@ Output ONLY JSON."""
         print(f"  Severe: {severe_count}, Soft: {len(outlier_samples) - severe_count}")
         
         print(f"\n[Step 2] Select MATCHED NORMAL samples for {dimension}...")
-        normal_samples = self.select_normal_samples(badcase_data, dimension, outlier_samples)
+        if explicit_pool is not None:
+            normal_samples = list(explicit_pool.get("normals", []))
+            print(f"  [EXPLICIT] frozen normal controls: {len(normal_samples)}")
+        else:
+            normal_samples = self.select_normal_samples(badcase_data, dimension, outlier_samples)
         normal_indices = [s.get('index', -1) for s in normal_samples]
         print(f"  Selected {len(normal_samples)} normal samples")
         print(f"  Normal indices: {normal_indices}")

@@ -35,10 +35,10 @@ E 类残差偏好自迭代流水线入口。
 - --gate-badcase-count：gate 中抽取的 E 类 badcase 数，默认 6。
 - --gate-normal-count：gate 中抽取的 normal 样本数，默认 6。
 - --gate-min-badcase-improve-rate：badcase 至少改善比例，默认 0.5。
-- --gate-min-badcase-improvement：目标维度绝对误差至少下降多少才算改善，默认 0.5 分。
-- --gate-max-badcase-worsening：badcase 目标维度允许恶化阈值，默认 0.0 分，即不允许恶化。
-- --gate-max-normal-regression：normal 目标维度允许恶化阈值，默认 0.5 分。
-- --gate-max-cross-dim-regression：非目标维度允许恶化阈值，默认 0.5 分。
+- --gate-min-badcase-improvement：（已弃用）判定统一使用共享 clear 阈值（decision_thresholds）。
+- --gate-max-badcase-worsening：（已弃用）判定统一使用共享 clear 阈值（decision_thresholds）。
+- --gate-max-normal-regression：（已弃用）判定统一使用共享 clear 阈值（decision_thresholds）。
+- --gate-max-cross-dim-regression：（已弃用）判定统一使用共享 clear 阈值（decision_thresholds）。
 - --gate-eval：gate 门控报告输出路径，默认 etype_analysis/gate_eval_etype_next.json。
 - --promote-final：人工审核通过后才使用；将候选 prompt 覆盖为 final_prompt_meta.md / final_prompt.md。
 """
@@ -53,6 +53,13 @@ from typing import Any, Dict, List, Optional
 
 from aes_badcase_miner import AESBadcaseMiner
 from batch_scoring import BatchEssayScorer
+from decision_thresholds import (
+    CLEAR_IMPROVEMENT_DELTA,
+    CLEAR_REGRESSION_DELTA,
+    is_clear_improvement,
+    is_clear_regression,
+    q_score,
+)
 from etype_preference_analyzer import ContrastiveETypeAnalyzer
 from gate_test_sampler import GateTestSampler
 from micro_scoring_gate import MicroScoringGate
@@ -366,8 +373,9 @@ class ETypeIterationRunner:
         passed = (
             candidate_target["severe"] <= baseline_target["severe"]
             and candidate_target["score"] < baseline_target["score"]
-            and 5 * candidate_b["severe"] + candidate_b["soft"]
-            <= 5 * baseline_b["severe"] + baseline_b["soft"]
+            # Global B regression uses the unified Q = 2.5*severe + soft.
+            and q_score(candidate_b["severe"], candidate_b["soft"])
+            <= q_score(baseline_b["severe"], baseline_b["soft"])
             and not new_dimensions
         )
         payload = {
@@ -416,11 +424,12 @@ class ETypeIterationRunner:
             abs(float(row["AI"][dimension]) - float(row["teacher"][dimension]))
             for row in candidate_rows.values()
         ) / len(candidate_rows)
-        worsened = sum(delta > 0.5 for delta in target_deltas)
+        worsened = sum(is_clear_regression(delta) for delta in target_deltas)
         passed = (
             candidate_b["severe"] <= baseline_b["severe"]
-            and 5 * candidate_b["severe"] + candidate_b["soft"]
-            <= 5 * baseline_b["severe"] + baseline_b["soft"]
+            # Global B regression uses the unified Q = 2.5*severe + soft.
+            and q_score(candidate_b["severe"], candidate_b["soft"])
+            <= q_score(baseline_b["severe"], baseline_b["soft"])
             and candidate_target_mae <= baseline_target_mae
             and worsened <= 1
         )
@@ -431,7 +440,7 @@ class ETypeIterationRunner:
             "b_candidate": candidate_b,
             "target_mae_baseline": baseline_target_mae,
             "target_mae_candidate": candidate_target_mae,
-            "target_samples_worsened_gt_0_5": worsened,
+            "target_samples_clear_regressions": worsened,
             "overall_mae_baseline": scoring_mae(self.args.validation_baseline),
             "overall_mae_candidate": scoring_mae(self.args.test_output),
         }
@@ -646,16 +655,16 @@ class ETypeIterationRunner:
                     "candidate_abs_error": cand_abs,
                     "delta_abs_error": cand_abs - base_abs,
                 }
-                if dim != dimension and cand_abs - base_abs > self.args.gate_max_cross_dim_regression:
+                if dim != dimension and is_clear_regression(cand_abs - base_abs):
                     severe_cross_dim_regressions += 1
 
             if sample_type == "badcase":
-                if target_delta <= -self.args.gate_min_badcase_improvement:
+                if is_clear_improvement(target_delta):
                     badcase_improved += 1
-                if target_delta > self.args.gate_max_badcase_worsening:
+                if is_clear_regression(target_delta):
                     badcase_worsened += 1
             elif sample_type == "normal":
-                if target_delta > self.args.gate_max_normal_regression:
+                if is_clear_regression(target_delta):
                     normal_worsened += 1
 
             rows.append(
@@ -688,11 +697,12 @@ class ETypeIterationRunner:
             "decision": "needs_human_review" if passed else "reject_candidate",
             "discarded_files": discarded_files,
             "criteria": {
+                "clear_improvement_delta": CLEAR_IMPROVEMENT_DELTA,
+                "clear_regression_delta": CLEAR_REGRESSION_DELTA,
                 "min_badcase_improve_rate": self.args.gate_min_badcase_improve_rate,
-                "min_badcase_improvement": self.args.gate_min_badcase_improvement,
-                "max_badcase_worsening": self.args.gate_max_badcase_worsening,
-                "max_normal_regression": self.args.gate_max_normal_regression,
-                "max_cross_dim_regression": self.args.gate_max_cross_dim_regression,
+                "max_badcase_worsened_count": self.args.gate_max_badcase_worsened_count,
+                "max_normal_worsened_count": self.args.gate_max_normal_worsened_count,
+                "max_cross_dim_regression_count": self.args.gate_max_cross_dim_regression_count,
             },
             "summary": {
                 "dimension": dimension,
@@ -874,10 +884,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--gate-badcase-count", type=int, default=6)
     parser.add_argument("--gate-normal-count", type=int, default=6)
     parser.add_argument("--gate-min-badcase-improve-rate", type=float, default=0.5)
-    parser.add_argument("--gate-min-badcase-improvement", type=float, default=0.5)
-    parser.add_argument("--gate-max-badcase-worsening", type=float, default=0.0)
-    parser.add_argument("--gate-max-normal-regression", type=float, default=0.5)
-    parser.add_argument("--gate-max-cross-dim-regression", type=float, default=0.5)
+    parser.add_argument("--gate-min-badcase-improvement", type=float, default=0.5,
+                        help="deprecated: unified clear thresholds are used instead")
+    parser.add_argument("--gate-max-badcase-worsening", type=float, default=0.0,
+                        help="deprecated: unified clear thresholds are used instead")
+    parser.add_argument("--gate-max-normal-regression", type=float, default=0.5,
+                        help="deprecated: unified clear thresholds are used instead")
+    parser.add_argument("--gate-max-cross-dim-regression", type=float, default=0.5,
+                        help="deprecated: unified clear thresholds are used instead")
     parser.add_argument("--gate-max-badcase-worsened-count", type=int, default=0)
     parser.add_argument("--gate-max-normal-worsened-count", type=int, default=1)
     parser.add_argument("--gate-max-cross-dim-regression-count", type=int, default=1)

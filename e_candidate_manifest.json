@@ -1,0 +1,249 @@
+{
+  "phase": "phase1_preexecution",
+  "status": "approved",
+  "file_status": "draft (score-free); after reviewer approval rename to e_candidate_manifest.json, fill approval metadata and compute the frozen SHA-256 over the manifest body",
+  "created_at": "2026-09-21T20:04:05",
+  "consensus": {
+    "version": "E-consensus-robust-z-v1",
+    "b_consensus_rule": "mean_and_rerun_conservative",
+    "b_consensus_description_kind": "operative_adjudication (mean-profile membership + rerun re-confirmation); not a natural symmetric consensus"
+  },
+  "sources": {
+    "train_run1": "train_scoring_results6.json",
+    "train_run2": "train_scoring_results6_rerun.json",
+    "train_mean": "final_train_scoring_results_mean.json"
+  },
+  "selection_rules": [
+    "structure targets: all structure E consensus samples",
+    "normal controls: >=5, not flagged as E (any dimension) or B in either source; nearest matches to E targets, then band coverage (low/mid/high), then fill to 6",
+    "cross-dim content: top-2 content E consensus by |mean_z| (boundary/leakage watch)",
+    "cross-dim expression: top-2 by |mean expression delta| (no expression E supply)",
+    "B roles: all B consensus samples (membership rule 'mean_and_rerun_conservative')",
+    "one scoring identity per unique global index; roles are shared",
+    "no sample list changes after candidate rule or scores are seen"
+  ],
+  "counts": {
+    "structure_targets": 4,
+    "normal_controls": 6,
+    "cross_dim_content": 2,
+    "cross_dim_expression": 2,
+    "b_consensus": 8,
+    "unique_indices": 17,
+    "role_counts": {
+      "structure_e_target": 4,
+      "b_consensus_soft": 6,
+      "cross_dim_content": 2,
+      "b_consensus_severe": 2,
+      "normal_control": 6,
+      "cross_dim_expression": 2
+    }
+  },
+  "scoring_dedup_note": "micro/regular/full-train/validation reuse one candidate score per (prompt_sha256, model, global_index, repeat_id, scoring_protocol)",
+  "baseline_files": {
+    "final_prompt_meta.md": "72ca44765e86c075cf06865c7c7fcf1d6a6d74339c5131a10add6ee809830a49",
+    "final_prompt.md": "72ca44765e86c075cf06865c7c7fcf1d6a6d74339c5131a10add6ee809830a49",
+    "train_scoring_results6.json": "2d2c1af7a4176d9ee88f6e49a15072fece013a0d714886e8b468e1506bcec629",
+    "train_scoring_results6_rerun.json": "d43c5496e5c8bf7c0906e581a9745de114d9dbdd69a6f7113159ec254bd8e0f4",
+    "final_train_scoring_results_mean.json": "6e04b8dd1d253073dae53eb505cfd51edbfbf3f40040512d46e80fbdd3e556c5",
+    "final_train_scoring_results_mean.provenance.json": "0213ed26b02c4857252b9cec137a563fec510ed714fa3c01f88e49b00c3f2af3",
+    "test_scoring_results6.json": "4cd9278ebd4a7c26fb5e24848c0e15b70d1680b940dce8af0cd609783694783b",
+    "test_scoring_results6_rerun.json": "ae818ce7a3a51c662afc53a29d37c2baeb433ddbde9cf885380f4b01d46b14a5",
+    "final_validation_scoring_results_mean.json": "802c77fc26f99a5a28ae480434c29e5558cea53e3706120e93fb00339c173b0d",
+    "final_validation_scoring_results_mean.provenance.json": "401d2e38f00aecde0b766de07a36b115ff03064b7f25b1d877f2aa2cf83be0f8",
+    "train_essays.json": "db480e954c3f495d9242537cd4a828a22a2abf58e3ddb72474f4af15edc713cf",
+    "test_essays.json": "6f187c959d4914f9026e3c87df7c4c1452bd9d6679286447bebf1ead19a72b4e",
+    "b_protocol_state.json": "7d428f24758a4d5c4d2efc32b1b69f797b5bf63201c27dea13c626941c027dce",
+    "b_validation_report.json": "5e007f7ef0c5a66e9ca5097beb53fcfddb0417e8bf1979528ac6a106e12d510e",
+    "final_evidence.json": "48dd15d5da8dbff318678715b3264fb7bfa772e45028102bc70e0682afc0752f"
+  },
+  "approval": {
+    "status": "approved",
+    "approved_by": "项目负责人",
+    "approved_at": "2026-09-21T21:07:39",
+    "frozen_sha256": "2c80f90b426fd38db94ed7889acd8d9db098be6c1cba804000e199e87fbd0817"
+  },
+  "unique_global_indices": [
+    2,
+    8,
+    13,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    22,
+    25,
+    26,
+    28,
+    36,
+    37,
+    46,
+    47
+  ],
+  "samples": [
+    {
+      "global_index": 2,
+      "evidence_roles": [
+        "normal_control"
+      ],
+      "selection_reasons": [
+        "extra matched control (fill to 6)"
+      ]
+    },
+    {
+      "global_index": 8,
+      "evidence_roles": [
+        "normal_control"
+      ],
+      "selection_reasons": [
+        "nearest match to structure E target 13 (d_structure=0.0, d_len=123)"
+      ]
+    },
+    {
+      "global_index": 13,
+      "evidence_roles": [
+        "b_consensus_soft",
+        "structure_e_target"
+      ],
+      "selection_reasons": [
+        "structure E consensus soft (mean_z=-1.518, mean_delta=-1.50)",
+        "B consensus soft (bias_mean=-1.500, directions soft/soft)"
+      ]
+    },
+    {
+      "global_index": 15,
+      "evidence_roles": [
+        "b_consensus_soft"
+      ],
+      "selection_reasons": [
+        "B consensus soft (bias_mean=-1.167, directions None/soft)"
+      ]
+    },
+    {
+      "global_index": 16,
+      "evidence_roles": [
+        "b_consensus_soft"
+      ],
+      "selection_reasons": [
+        "B consensus soft (bias_mean=-1.167, directions None/severe)"
+      ]
+    },
+    {
+      "global_index": 17,
+      "evidence_roles": [
+        "normal_control"
+      ],
+      "selection_reasons": [
+        "nearest match to structure E target 47 (d_structure=0.0, d_len=103)"
+      ]
+    },
+    {
+      "global_index": 18,
+      "evidence_roles": [
+        "b_consensus_soft",
+        "structure_e_target"
+      ],
+      "selection_reasons": [
+        "structure E consensus severe (mean_z=-2.698, mean_delta=-2.50)",
+        "B consensus soft (bias_mean=-1.667, directions severe/soft)"
+      ]
+    },
+    {
+      "global_index": 19,
+      "evidence_roles": [
+        "cross_dim_expression"
+      ],
+      "selection_reasons": [
+        "largest |mean expression delta| (no expression E consensus; leakage watch, delta=-1.50)"
+      ]
+    },
+    {
+      "global_index": 20,
+      "evidence_roles": [
+        "normal_control"
+      ],
+      "selection_reasons": [
+        "nearest match to structure E target 22 (d_structure=1.0, d_len=151)"
+      ]
+    },
+    {
+      "global_index": 22,
+      "evidence_roles": [
+        "b_consensus_soft",
+        "cross_dim_content",
+        "structure_e_target"
+      ],
+      "selection_reasons": [
+        "structure E consensus severe (mean_z=2.698, mean_delta=+2.50)",
+        "B consensus soft (bias_mean=+1.667, directions severe/soft)",
+        "content E consensus boundary sample (|mean_z|=3.035)"
+      ]
+    },
+    {
+      "global_index": 25,
+      "evidence_roles": [
+        "cross_dim_expression"
+      ],
+      "selection_reasons": [
+        "largest |mean expression delta| (no expression E consensus; leakage watch, delta=-1.50)"
+      ]
+    },
+    {
+      "global_index": 26,
+      "evidence_roles": [
+        "normal_control"
+      ],
+      "selection_reasons": [
+        "nearest match to structure E target 18 (d_structure=0.0, d_len=0)"
+      ]
+    },
+    {
+      "global_index": 28,
+      "evidence_roles": [
+        "b_consensus_soft"
+      ],
+      "selection_reasons": [
+        "B consensus soft (bias_mean=-1.500, directions severe/soft)"
+      ]
+    },
+    {
+      "global_index": 36,
+      "evidence_roles": [
+        "normal_control"
+      ],
+      "selection_reasons": [
+        "extra matched control (fill to 6)"
+      ]
+    },
+    {
+      "global_index": 37,
+      "evidence_roles": [
+        "cross_dim_content"
+      ],
+      "selection_reasons": [
+        "content E consensus boundary sample (|mean_z|=2.361)"
+      ]
+    },
+    {
+      "global_index": 46,
+      "evidence_roles": [
+        "b_consensus_severe"
+      ],
+      "selection_reasons": [
+        "B consensus severe (bias_mean=-1.667, directions soft/severe)"
+      ]
+    },
+    {
+      "global_index": 47,
+      "evidence_roles": [
+        "b_consensus_severe",
+        "structure_e_target"
+      ],
+      "selection_reasons": [
+        "structure E consensus soft (mean_z=-1.855, mean_delta=-2.00)",
+        "B consensus severe (bias_mean=-1.667, directions soft/severe)"
+      ]
+    }
+  ]
+}

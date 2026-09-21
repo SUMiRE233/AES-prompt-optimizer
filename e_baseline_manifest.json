@@ -1,0 +1,83 @@
+{
+  "phase": "phase1_preexecution",
+  "status": "draft_pending_human_approval",
+  "created_at": "2026-09-21T20:04:05",
+  "hash_algorithm": "sha256",
+  "anchors": [
+    {
+      "path": "final_prompt_meta.md",
+      "sha256": "72ca44765e86c075cf06865c7c7fcf1d6a6d74339c5131a10add6ee809830a49",
+      "purpose": "frozen B-final prompt metadata (V6)"
+    },
+    {
+      "path": "final_prompt.md",
+      "sha256": "72ca44765e86c075cf06865c7c7fcf1d6a6d74339c5131a10add6ee809830a49",
+      "purpose": "frozen B-final prompt text (V6)"
+    },
+    {
+      "path": "train_scoring_results6.json",
+      "sha256": "2d2c1af7a4176d9ee88f6e49a15072fece013a0d714886e8b468e1506bcec629",
+      "purpose": "V6 train run1 scoring"
+    },
+    {
+      "path": "train_scoring_results6_rerun.json",
+      "sha256": "d43c5496e5c8bf7c0906e581a9745de114d9dbdd69a6f7113159ec254bd8e0f4",
+      "purpose": "V6 train run2 scoring (rerun)"
+    },
+    {
+      "path": "final_train_scoring_results_mean.json",
+      "sha256": "6e04b8dd1d253073dae53eb505cfd51edbfbf3f40040512d46e80fbdd3e556c5",
+      "purpose": "V6 train two-run mean evidence"
+    },
+    {
+      "path": "final_train_scoring_results_mean.provenance.json",
+      "sha256": "0213ed26b02c4857252b9cec137a563fec510ed714fa3c01f88e49b00c3f2af3",
+      "purpose": "V6 train mean evidence provenance"
+    },
+    {
+      "path": "test_scoring_results6.json",
+      "sha256": "4cd9278ebd4a7c26fb5e24848c0e15b70d1680b940dce8af0cd609783694783b",
+      "purpose": "V6 validation run1 scoring"
+    },
+    {
+      "path": "test_scoring_results6_rerun.json",
+      "sha256": "ae818ce7a3a51c662afc53a29d37c2baeb433ddbde9cf885380f4b01d46b14a5",
+      "purpose": "V6 validation run2 scoring"
+    },
+    {
+      "path": "final_validation_scoring_results_mean.json",
+      "sha256": "802c77fc26f99a5a28ae480434c29e5558cea53e3706120e93fb00339c173b0d",
+      "purpose": "V6 validation two-run mean evidence (generated in Phase 1)"
+    },
+    {
+      "path": "final_validation_scoring_results_mean.provenance.json",
+      "sha256": "401d2e38f00aecde0b766de07a36b115ff03064b7f25b1d877f2aa2cf83be0f8",
+      "purpose": "V6 validation mean evidence provenance"
+    },
+    {
+      "path": "train_essays.json",
+      "sha256": "db480e954c3f495d9242537cd4a828a22a2abf58e3ddb72474f4af15edc713cf",
+      "purpose": "train split essays + teacher labels"
+    },
+    {
+      "path": "test_essays.json",
+      "sha256": "6f187c959d4914f9026e3c87df7c4c1452bd9d6679286447bebf1ead19a72b4e",
+      "purpose": "validation split essays + teacher labels"
+    },
+    {
+      "path": "b_protocol_state.json",
+      "sha256": "7d428f24758a4d5c4d2efc32b1b69f797b5bf63201c27dea13c626941c027dce",
+      "purpose": "B stop reason authority"
+    },
+    {
+      "path": "b_validation_report.json",
+      "sha256": "5e007f7ef0c5a66e9ca5097beb53fcfddb0417e8bf1979528ac6a106e12d510e",
+      "purpose": "B validation selection record (legacy label kept)"
+    },
+    {
+      "path": "final_evidence.json",
+      "sha256": "48dd15d5da8dbff318678715b3264fb7bfa772e45028102bc70e0682afc0752f",
+      "purpose": "B freeze evidence index"
+    }
+  ]
+}

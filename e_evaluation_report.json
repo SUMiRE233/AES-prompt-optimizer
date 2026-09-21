@@ -1,0 +1,32 @@
+{
+  "created_at": "2026-09-21T22:05:55",
+  "rule_index": 1,
+  "stages": {
+    "first_pass": {
+      "rule": "reject when any (sample, dim) delta >= +2.0",
+      "passed": false,
+      "violations": [
+        {
+          "index": 19,
+          "dimension": "expression",
+          "delta": 2.0
+        }
+      ]
+    }
+  },
+  "manifest": "e_candidate_manifest.json",
+  "manifest_sha256": "915e3dd0e1aed46ad4f136fc0062384b2b87d93129c2b9210c1d96e4e9e1bac9",
+  "rule_status": "approved_pending_execution",
+  "candidate_prompt": {
+    "meta": "e_candidate_prompt_meta.md",
+    "prompt": "e_candidate_prompt.md"
+  },
+  "status": "E_EVALUATED_REJECTED",
+  "budget": {
+    "scoring_success": 34,
+    "analysis_success": 1,
+    "attempts": 49,
+    "updated_at": "2026-09-21T22:14:43"
+  },
+  "updated_at": "2026-09-21T22:14:43"
+}

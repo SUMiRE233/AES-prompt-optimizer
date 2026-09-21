@@ -4,7 +4,7 @@ An AI-assisted research prototype for iterating an essay-scoring prompt against 
 
 ## Evidence status
 
-- **Reproducible offline:** prompt preprocessing, badcase mining, deterministic data-contract checks, gate calculations, candidate commit/rollback, a public synthetic smoke path, and 177 unit tests.
+- **Reproducible offline:** prompt preprocessing, badcase mining, deterministic data-contract checks, gate calculations, candidate commit/rollback, a public synthetic smoke path, and 251 unit tests.
 - **Historical experiment evidence:** 48 essays split with seed 42 into 36 train and 12 validation/holdout samples. The holdout participated in version selection and is **not** an independent test set.
 - **Real rejection evidence:** structure reached the micro gate and was rejected; content passed micro and was rejected by the regular gate. Both candidates rolled back without changing the then-current B final. No E candidate has passed every layer.
 - **Out of scope by design:** `technique` and `length` are evaluated by upstream deterministic scripts. They are not prompt outputs, optimization targets, or project claims in this repository.

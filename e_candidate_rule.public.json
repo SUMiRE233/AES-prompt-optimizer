@@ -1,0 +1,207 @@
+{
+  "note": "e_candidate_rule.json 的公开脱敏副本；证据引文 span（作文原文片段）已删除，其余审计字段保留",
+  "created_at": "2026-09-21T23:01:47",
+  "status": "E_NO_VALID_CANDIDATE",
+  "generation_attempts": 1,
+  "source": null,
+  "analysis_stats": null,
+  "selection": {
+    "policy": "lazy_sequential_first_pass",
+    "ruling": "2026-09-21 惰性补全裁定：按序取第一条；Gate 0 硬拒绝在选取之后执行；未通过则顺延至下一条；不做前筛选排序",
+    "scan_start_index": 2,
+    "source": "human_directed_start",
+    "total_rules_returned": 3,
+    "tried": [
+      {
+        "index": 2,
+        "passed": false,
+        "checks": [
+          {
+            "code": "G0-anchor",
+            "ok": true,
+            "detail": "should_be_injected_at='**结构分特殊情形**' vs '**结构分特殊情形**'"
+          },
+          {
+            "code": "G0-hard-threshold",
+            "ok": false,
+            "detail": "rule must not contain fixed numeric anchors"
+          },
+          {
+            "code": "G0-scope",
+            "ok": true,
+            "detail": "expected_scope=['structure'] must be a subset of ['structure']"
+          },
+          {
+            "code": "G0-evidence",
+            "ok": true,
+            "detail": "outlier_indices=[18, 13]"
+          },
+          {
+            "code": "G0-evidence-pool",
+            "ok": true,
+            "detail": "outlier=[18, 13], normal=[20, 36], evidence_count=2 vs 2; outlier pool [13, 18, 22, 47], normal pool [2, 8, 17, 20, 26, 36]"
+          },
+          {
+            "code": "G0-duplicate",
+            "ok": true,
+            "detail": "rule must not be a rewrite of existing prompt items"
+          },
+          {
+            "code": "G0-structure-contract",
+            "ok": true,
+            "detail": "violations=[]"
+          },
+          {
+            "code": "G0-budgets",
+            "ok": true,
+            "detail": "added_chars=202 (<= 800), total_chars=2897 (<= 4200), max_new_bold=2"
+          }
+        ]
+      }
+    ],
+    "untried": 0,
+    "selected_index": null
+  },
+  "history": [
+    {
+      "rule_index": 0,
+      "rule_status": "approved_pending_execution",
+      "selected_at": "2026-09-21T21:47:20",
+      "evaluation_status": "E_EVALUATED_REJECTED"
+    },
+    {
+      "rule_index": 1,
+      "rule_status": "approved_pending_execution",
+      "selected_at": "2026-09-21T22:05:43",
+      "evaluation_status": "E_EVALUATED_REJECTED"
+    }
+  ],
+  "human_review": {
+    "status": "not_required",
+    "approved_by": null,
+    "approved_at": null,
+    "note": "2026-09-21 裁定：硬审查（Gate 0 串行检查）通过即进入测试流程，此节点不设人工通过点；人工否决权保留至执行开始前",
+    "veto_available_until": "execution start"
+  },
+  "budget": {
+    "scoring_success": 0,
+    "analysis_success": 1,
+    "attempts": 1,
+    "updated_at": "2026-09-21T21:12:54"
+  },
+  "selected_at": "2026-09-21T22:16:37",
+  "rule_index": null,
+  "rule": null,
+  "rules_returned": [
+    {
+      "trigger_condition": "记叙文以某一现实场景（如躺床闭眼、车上出神）起笔，中段进入回忆，结尾回到该场景或重现开头意象，形成可辨认的回环框架",
+      "scoring_adjustment": "可视为开头、主体、结尾三部分齐备且首尾呼应，结构分宜落在中等偏上区间；时间切换处缺少显性过渡词、段落长短不均属轻微瑕疵，不作为下压依据",
+      "counter_examples": "若全篇无法辨认段落层次、开头与结尾均无法定位，或回忆片段彼此无先后与主题关联、通篇随意堆叠，则不适用",
+      "evidence": {
+        "outlier_indices": [
+          13,
+          47
+        ],
+        "normal_indices": [
+          17,
+          26,
+          20
+        ]
+      },
+      "safe_for_global_bias": true,
+      "confidence": 0.7,
+      "evidence_count": 2,
+      "should_be_injected_at": "**结构分特殊情形**",
+      "injection_reason": "该项已强调轻微过渡生硬不应压分，此规则补充“隐性回环框架亦属首尾呼应”的识别标准，与原条款同类",
+      "injection_strength": "soft",
+      "expected_scope": [
+        "structure"
+      ],
+      "anti_overfit_boundary": "不适用于议论文；也不适用于仅在结尾突兀插入一句抒情而与开头无任何意象、场景或语句照应的文章",
+      "forbidden_generalization": [
+        "不得推广为凡记叙文均视为首尾呼应",
+        "不得据此提高内容或语言维度评价",
+        "不得用于判定段落层次完全缺失的文章"
+      ],
+      "positive_evidence_spans": {
+        "removed_for_privacy": 3
+      },
+      "counter_evidence_spans": {
+        "removed_for_privacy": 2
+      }
+    },
+    {
+      "trigger_condition": "文章主体分层清楚、已出现承担总括功能的末段（如“综上所述”“总结来说”一类收束语），但末句因篇幅或时间仓促而戛然中断或收尾潦草",
+      "scoring_adjustment": "宜按“首尾齐全、层次分明”评价，将断尾视为轻微瑕疵而非结尾缺失；不得据此套用“完全无分段、首尾缺失”的极端条款大幅压分",
+      "counter_examples": "若全文在主体论述中途中断、根本没有出现任何收束段或总括句，或段落顺序混乱不可读，则不适用",
+      "evidence": {
+        "outlier_indices": [
+          18,
+          47
+        ],
+        "normal_indices": [
+          2,
+          8,
+          36
+        ]
+      },
+      "safe_for_global_bias": true,
+      "confidence": 0.68,
+      "evidence_count": 2,
+      "should_be_injected_at": "**结构分特殊情形**",
+      "injection_reason": "原条款界定了“首尾缺失”的极端适用范围，此规则细化“断尾”与“无尾”的区分，属同一判定维度",
+      "injection_strength": "soft",
+      "expected_scope": [
+        "structure"
+      ],
+      "anti_overfit_boundary": "不适用于主体部分本身只有单一层次、或收束段与前文论点无关的文章；也不可用于抵消段落顺序混乱的实质缺陷",
+      "forbidden_generalization": [
+        "不得推广为所有未写完的作文都按完整结构评",
+        "不得用于内容或语言维度的宽免",
+        "不得据此忽略主体层次单薄的问题"
+      ],
+      "positive_evidence_spans": {
+        "removed_for_privacy": 2
+      },
+      "counter_evidence_spans": {
+        "removed_for_privacy": 2
+      }
+    },
+    {
+      "trigger_condition": "文中错别字密集、个别语句不通，但段落划分清晰、开头主体结尾可辨",
+      "scoring_adjustment": "结构判定宜先撇开字词与语病，只看分段与首尾是否成立；语言层面的缺陷不作为压低结构档位的理由",
+      "counter_examples": "若语句混乱到段落主旨完全无法辨认、读者无法判断该段在全篇中的位置与作用，则属实质性结构缺陷，不受此限",
+      "evidence": {
+        "outlier_indices": [
+          18,
+          13
+        ],
+        "normal_indices": [
+          20,
+          36
+        ]
+      },
+      "safe_for_global_bias": true,
+      "confidence": 0.65,
+      "evidence_count": 2,
+      "should_be_injected_at": "**结构分特殊情形**",
+      "injection_reason": "原条款已要求结构判定不受错别字语病影响，此规则给出可操作的判定顺序与例外边界",
+      "injection_strength": "soft",
+      "expected_scope": [
+        "structure"
+      ],
+      "anti_overfit_boundary": "不适用于语句混乱导致段落功能无法辨认的情况，也不得用来为内容跑题或段落层次真实缺失开脱",
+      "forbidden_generalization": [
+        "不得推广为语言差也一律给高结构分",
+        "不得用于表达维度的加分",
+        "不得据此忽略段落顺序混乱"
+      ],
+      "positive_evidence_spans": {
+        "removed_for_privacy": 2
+      },
+      "counter_evidence_spans": {
+        "removed_for_privacy": 2
+      }
+    }
+  ]
+}

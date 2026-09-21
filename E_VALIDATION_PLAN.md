@@ -1,3 +1,7 @@
+> 历史状态：V4 时代 E 类探索证据。当前正式 B baseline 已升级为 V6。
+> 本文中的残差数量、候选规则、阈值结果和晋升结论不得直接复用于 V6；
+> 仅保留失败模式、事务回滚和门禁设计证据。
+
 # E-route Validation Plan after B Final
 
 Date: 2026-09-19

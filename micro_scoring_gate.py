@@ -11,6 +11,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
+from decision_thresholds import (
+    CLEAR_IMPROVEMENT_DELTA,
+    CLEAR_REGRESSION_DELTA,
+    MICRO_ALLOWED_CLEAR_REGRESSIONS,
+    is_clear_regression,
+)
+
 
 # ============================================================
 # Micro gate weights and decision thresholds
@@ -34,11 +41,9 @@ class Config:
     # The weighted average improvement must reach this value.
     PASS_SCORE_THRESHOLD = 0.01
 
-    # Hard guards prevent a positive aggregate from hiding a large regression.
-    MAX_OUTLIER_TARGET_REGRESSION = 0.0
-    MAX_NORMAL_TARGET_REGRESSION = 0.5
-    MAX_SINGLE_DIM_REGRESSION = 1.0
-    MAX_B_BIAS_REGRESSION = 0.5
+    # Hard guards: every regression decision uses the single shared boundary
+    # from decision_thresholds (clear regression = delta_abs_error >= +1.0).
+    # A positive aggregate can never offset a hard violation.
 
 
 class MicroScoringGate:
@@ -327,7 +332,7 @@ class MicroScoringGate:
                 )
                 dim_details[dimension] = details
 
-                if details["improvement"] < -Config.MAX_SINGLE_DIM_REGRESSION:
+                if is_clear_regression(-details["improvement"]):
                     violations.append(
                         {
                             "type": "single_dimension_regression",
@@ -352,14 +357,8 @@ class MicroScoringGate:
                         }
                     )
 
-                    max_target_regression = (
-                        Config.MAX_OUTLIER_TARGET_REGRESSION
-                        if role == "outlier"
-                        else Config.MAX_NORMAL_TARGET_REGRESSION
-                    )
-                    if (
-                        dimension == target_dimension
-                        and details["improvement"] < -max_target_regression
+                    if dimension == target_dimension and is_clear_regression(
+                        -details["improvement"]
                     ):
                         violations.append(
                             {
@@ -400,7 +399,7 @@ class MicroScoringGate:
                         "contribution": contribution,
                     }
                 )
-                if improvement < -Config.MAX_B_BIAS_REGRESSION:
+                if is_clear_regression(-improvement):
                     violations.append(
                         {
                             "type": "b_bias_regression",
@@ -444,10 +443,9 @@ class MicroScoringGate:
                 "b_severity": Config.B_SEVERITY_WEIGHTS,
             },
             "hard_guards": {
-                "max_outlier_target_regression": Config.MAX_OUTLIER_TARGET_REGRESSION,
-                "max_normal_target_regression": Config.MAX_NORMAL_TARGET_REGRESSION,
-                "max_single_dimension_regression": Config.MAX_SINGLE_DIM_REGRESSION,
-                "max_b_bias_regression": Config.MAX_B_BIAS_REGRESSION,
+                "clear_improvement_delta": CLEAR_IMPROVEMENT_DELTA,
+                "clear_regression_delta": CLEAR_REGRESSION_DELTA,
+                "allowed_clear_regressions": dict(MICRO_ALLOWED_CLEAR_REGRESSIONS),
             },
             "violations": violations,
             "rows": rows,

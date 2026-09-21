@@ -30,7 +30,7 @@ iteration_history.json
 etype_iteration_history.json
 etype_contrastive_log.json
 etype_frozen_dims.json
-etype_analysis/*.json
+etype_analysis/
 optimized_result.json
 test_injected_prompt*.md
 prompt_candidate_decisions.json
@@ -58,6 +58,18 @@ micro_scoring_*.json
 injected_prompt_next*.md
 final_aes_badcases.json
 final_train_scoring_results.json
+
+# Planning/guidance outlines (desktop documents; never committed).
+*指导大纲*.md
+
+# E-route manifests: drafts and per-sample evidence stay local.
+e_candidate_manifest.draft.json
+e_candidate_evidence.local.json
+# Rejected-run artifacts (essay excerpts / candidate prompts) stay local;
+# the sanitized e_candidate_rule.public.json is the committable copy.
+e_candidate_rule.json
+e_candidate_prompt.md
+e_candidate_prompt_meta.md
 final_evidence.json
 final_train_scoring_results_mean*.json
 run_manifest*.json
